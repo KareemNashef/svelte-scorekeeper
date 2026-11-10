@@ -15,9 +15,9 @@ export const CARD_VALUES = [
   { label: 'Joker', value: 15 },
 ];
 
-export const THEMES = {
-  vibrant: 'from-slate-950 via-purple-950/40 to-slate-950',
-  ocean: 'from-slate-950 via-blue-950/40 to-slate-950',
-  sunset: 'from-slate-950 via-orange-950/30 to-slate-950',
-  forest: 'from-slate-950 via-emerald-950/30 to-slate-950',
-};
+export const THEMES: { id: import("./types").Theme; name: string; swatch: string }[] = [
+  { id: "glass", name: "Glass", swatch: "linear-gradient(135deg,#4f7bff,#a855f7,#ff6fa5)" },
+  { id: "baize", name: "Green Baize", swatch: "linear-gradient(135deg,#17503c 50%,#c8a14a 50%)" },
+  { id: "paper", name: "Scorepad", swatch: "#f6f9fc linear-gradient(#9bbad0 1px,transparent 1px) 0 0/9px 9px" },
+  { id: "pop", name: "Block Party", swatch: "linear-gradient(90deg,#2f3bff 25%,#ffd60a 25% 50%,#ff6a2b 50% 75%,#3ddc97 75%)" },
+];

@@ -24,4 +24,4 @@ export interface AppSettings {
   currentGroupId: string;
 }
 
-export type Theme = 'vibrant' | 'ocean' | 'sunset' | 'forest';
+export type Theme = "glass" | "baize" | "paper" | "pop";

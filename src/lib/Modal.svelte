@@ -1,52 +1,103 @@
 <script lang="ts">
-  import { fade, scale } from "svelte/transition";
+  import { fade } from "svelte/transition";
+  import { cubicOut, backOut, expoOut } from "svelte/easing";
   import { X } from "lucide-svelte";
+  import type { Snippet } from "svelte";
 
-  // Svelte 5 Props
-  let { isOpen, onClose, title, children } = $props<{
+  interface Props {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    children: any;
-  }>();
+    children: Snippet;
+  }
+
+  let { isOpen, onClose, title, children }: Props = $props();
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape" && isOpen) {
+      onClose();
+    }
+  }
+
+  function modalTransition(node: Element) {
+    const theme = document.body.dataset.theme || "glass";
+
+    if (theme === "glass") {
+      return {
+        duration: 220,
+        css: (t: number) => {
+          const eased = cubicOut(t);
+          return `
+            opacity: ${eased};
+            transform: scale(${0.92 + 0.08 * eased}) translateY(${(1 - eased) * 12}px);
+          `;
+        },
+      };
+    }
+
+    if (theme === "baize") {
+      return {
+        duration: 240,
+        css: (t: number) => {
+          const eased = cubicOut(t);
+          return `
+            opacity: ${eased};
+            transform: translateY(${(1 - eased) * 20}px);
+          `;
+        },
+      };
+    }
+
+    if (theme === "paper") {
+      return {
+        duration: 260,
+        css: (t: number) => {
+          const eased = backOut(t);
+          return `
+            opacity: ${Math.min(1, t * 1.5)};
+            transform: scale(${0.88 + 0.12 * eased}) rotate(${(1 - eased) * -2}deg);
+          `;
+        },
+      };
+    }
+
+    // pop theme: snappy punchy drop
+    return {
+      duration: 170,
+      css: (t: number) => {
+        const eased = expoOut(t);
+        return `
+          opacity: ${eased};
+          transform: translateY(${(1 - eased) * 16}px) scale(${0.94 + 0.06 * eased});
+        `;
+      },
+    };
+  }
 </script>
 
-{#if isOpen}
-  <!-- Removed items-end to enforce centered display everywhere, prevents off-screen push -->
-  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <!-- Backdrop -->
-    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-    <div
-      transition:fade={{ duration: 200 }}
-      onclick={onClose}
-      class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      aria-hidden="true"
-    ></div>
+<svelte:window onkeydown={handleKeydown} />
 
-    <!-- Modal Content: Material + Glassmorphism enforced -->
+{#if isOpen}
+  <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+  <div
+    class="sheet on"
+    transition:fade={{ duration: 180 }}
+    onclick={(event) => event.currentTarget === event.target && onClose()}
+  >
     <div
-      transition:scale={{ start: 0.95, duration: 250 }}
-      class="w-full max-w-md relative z-10 overflow-hidden flex flex-col
-             bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl
-             rounded-[2rem] max-h-[85dvh]"
+      class="box"
+      transition:modalTransition
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
     >
-      <!-- Header (sticky) -->
-      <div
-        class="flex justify-between items-center p-5 pb-3 flex-shrink-0 border-b border-white/10 bg-black/10"
-      >
-        <h3 class="text-xl font-black tracking-tight text-white">{title}</h3>
-        <button
-          onclick={onClose}
-          class="p-2 bg-white/5 hover:bg-white/20 rounded-full transition-all flex-shrink-0 border border-white/10 text-white shadow-sm"
-        >
-          <X size={18} />
+      <div class="sh">
+        <h2>{title}</h2>
+        <button class="x" onclick={onClose} aria-label="Close modal">
+          <X size={20} />
         </button>
       </div>
-
-      <!-- Scrollable body (Fully respects internal flex shrinking) -->
-      <div
-        class="overflow-y-auto overscroll-contain flex-1 p-5 scrollbar-hide text-white"
-      >
+      <div class="modal-body">
         {@render children()}
       </div>
     </div>
